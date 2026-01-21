@@ -1,213 +1,214 @@
-########################################################### Data preparation (Discovery cohort) ###########################################################
-# Discovery cohort data preparation
-echo "Discovery cohort data preparation"
-Rscript Discovery_Data_prepare_updated_20250731.R
+# # nohup bash Analysis.sh > Analysis.log 2>&1 &
+# ########################################################### Data preparation (Discovery cohort) ###########################################################
+# # Discovery cohort data preparation
+# echo "Discovery cohort data preparation"
+# Rscript 00_Discovery_Data_Prepare.R
 
-########################################################### Data analysis (Discovery cohort, All samples) ###########################################################
-# All samples
-Rscript 1Pre_processing_updated_20250731.R -i Discovery/data/proteinGroups.txt -c Discovery/data/clinical_info.csv -o Discovery/1_pre_processing -e 9 -d Input/HUMAN_9606_idmapping_selected.tab.gz
+# ########################################################### Data analysis (Discovery cohort, All samples) ###########################################################
+# # All samples
+# Rscript 01_Pre_Processing.R -i Discovery/data/proteinGroups.txt -c Discovery/data/clinical_info.csv -o Discovery/01_Pre_Processing -e 9 -d Input/HUMAN_9606_idmapping_selected.tab.gz
 
-Rscript 2Missing_Inspection.R -i Discovery/1_pre_processing/se_abu_data_filtered.rds -o Discovery/2_Missing_Inspection -e 9 -s 0.01
+# Rscript 02_Missing_Inspection.R -i Discovery/01_Pre_Processing/se_abu_data_filtered.rds -o Discovery/02_Missing_Inspection -e 9 -s 0.01
 
-Rscript 3Differential_expression_analysis.R -i Discovery/2_Missing_Inspection/norm_imp_MinProb.rds -o Discovery/3_Differential_Expression_Analysis -e 9 -u Discovery/1_pre_processing/uniprot_to_genename.rds
+# Rscript 03_Differential_expression_analysis.R -i Discovery/02_Missing_Inspection/norm_imp_MinProb.rds -o Discovery/03_Differential_expression_analysis -e 9 -u Discovery/01_Pre_Processing/uniprot_to_genename.rds
 
-Rscript 12Vis_Differential_expression_analysis.R -i Discovery/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o Discovery/12_Vis_Differential_expression_analysis -e 9
-Rscript 12Vis_Differential_expression_analysis_FDR_0102.R -i Discovery/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o Discovery/12_Vis_Differential_expression_analysis_FDR_0102 -e 9
+# Rscript 04_Vis_Differential_expression_analysis.R -i Discovery/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Discovery/04_Vis_Differential_expression_analysis -e 9
+# Rscript 04_Vis_Differential_expression_analysis_FDR_0102.R -i Discovery/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Discovery/04_Vis_Differential_expression_analysis_FDR_0102 -e 9
 
-echo "Rscript 13Vis_umap.R"
-Rscript 13Vis_umap.R -i Discovery/2_Missing_Inspection -o Discovery/13_Vis_umap -e 9 -d all -l TRUE
-Rscript 13Vis_umap.R -i Discovery/2_Missing_Inspection -o Discovery/13_Vis_umap -e 9 -d all -l FALSE
+# echo "Rscript 05_Vis_umap.R"
+# Rscript 05_Vis_umap.R -i Discovery/02_Missing_Inspection -o Discovery/05_Vis_umap -e 9 -d all -l TRUE
+# Rscript 05_Vis_umap.R -i Discovery/02_Missing_Inspection -o Discovery/05_Vis_umap -e 9 -d all -l FALSE
 
-echo "Rscript Rscript 19GSEA_allsamples.R"
-Rscript 19GSEA_allsamples.R -i Discovery/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o Discovery/19_GSEA_allsamples
+# echo "Rscript Rscript 06_GSEA.R"
+# Rscript 06_GSEA.R -i Discovery/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Discovery/06_GSEA
 
-Rscript 37_Clinical_heatmap_highest_variance.R --input Discovery/2_Missing_Inspection/norm_imp_MinProb.rds --output Discovery/37_Clinical_heatmap_top_variable --seed 9
+# Rscript 07_Clinical_heatmap.R --input Discovery/02_Missing_Inspection/norm_imp_MinProb.rds --output Discovery/07_Clinical_heatmap --seed 9
 
-########################################################### Data analysis (Discovery cohort, ALS only) ###########################################################
-# als only
-Rscript 1Pre_processing_updated_20250731.R -i Discovery/data/proteinGroups.txt -c Discovery/data/clinical_info.csv -o Discovery/1_pre_processing_als -e 9 --subset als -d Input/HUMAN_9606_idmapping_selected.tab.gz
+# ########################################################### Data analysis (Discovery cohort, ALS only) ###########################################################
+# # als only
+# Rscript 01_Pre_Processing.R -i Discovery/data/proteinGroups.txt -c Discovery/data/clinical_info.csv -o Discovery/01_Pre_Processing_als -e 9 --subset als -d Input/HUMAN_9606_idmapping_selected.tab.gz
 
-Rscript 2Missing_Inspection.R -i Discovery/1_pre_processing_als/se_abu_data_filtered.rds -o Discovery/2_Missing_Inspection_als -e 9 -s 0.01
+# Rscript 02_Missing_Inspection.R  -i Discovery/01_Pre_Processing_als/se_abu_data_filtered.rds -o Discovery/02_Missing_Inspection_subclusters -e 9 -s 0.01
 
-Rscript 5Clustering_updated_20250506.R -i Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds -o Discovery/5_Clustering_als -e 9
+# Rscript 08_Clustering_subclusters.R -i Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Discovery/08_Clustering_als -e 9
 
-Rscript 8Differential_expression_analysis_subclusters.R -i Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds -o Discovery/8_Differential_expression_analysis_subclusters -e 9 -c Discovery/5_Clustering_als/cluster_assignments_2.csv
+# Rscript 03_Differential_expression_analysis_subclusters.R -i Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Discovery/03_Differential_expression_analysis_subclusters -e 9 -c Discovery/08_Clustering_als/cluster_assignments_2.csv
 
-Rscript 9Vis_Differential_expression_analysis_subclusters.R -i Discovery/8_Differential_expression_analysis_subclusters/res.rds -o Discovery/9_Vis_Differential_expression_analysis_subclusters -d Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds -c Discovery/5_Clustering_als/cluster_assignments_2.csv -e 9
+# Rscript 04_Vis_Differential_expression_analysis_subclusters.R -i Discovery/03_Differential_expression_analysis_subclusters/res.rds -o Discovery/04_Vis_Differential_expression_analysis_subclusters -d Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -c Discovery/08_Clustering_als/cluster_assignments_2.csv -e 9
 
-echo "Rscript 13Vis_umap.R"
-Rscript 13Vis_umap.R -i Discovery/2_Missing_Inspection_als -o Discovery/13_Vis_umap -d als -e 9 -l TRUE -c Discovery/5_Clustering_als
+# echo "Rscript 05_Vis_umap.R"
+# Rscript 05_Vis_umap.R -i Discovery/02_Missing_Inspection_subclusters -o Discovery/05_Vis_umap -d als -e 9 -l TRUE -c Discovery/08_Clustering_als
 
-Rscript 13Vis_umap.R -i Discovery/2_Missing_Inspection_als -o Discovery/13_Vis_umap -d als -e 9 -l FALSE -c Discovery/5_Clustering_als
+# Rscript 05_Vis_umap.R -i Discovery/02_Missing_Inspection_subclusters -o Discovery/05_Vis_umap -d als -e 9 -l FALSE -c Discovery/08_Clustering_als
 
-echo "Rscript 19GSEA_subclusters.R"
-Rscript 19GSEA_subclusters.R -i Discovery/8_Differential_expression_analysis_subclusters/res.rds -o Discovery/19_GSEA_subclusters_k2
+# Rscript 06_GSEA_subclusters.R -i Discovery/03_Differential_expression_analysis_subclusters/res.rds -o Discovery/06_GSEA_subclusters_k2
 
-echo "Rscript 23WGCNA.R"
-Rscript 23WGCNA.R -i Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds -o Discovery/23_WGCNA -e 9 -c Discovery/5_Clustering_als/cluster_assignments_2.csv
+# # sex
+# Rscript 09_Clinical_features_subclusters.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Discovery/08_Clustering_als/cluster_assignments_2.csv --output Discovery/09_Clinical_features_subclusters --var sex
 
-# sex
-Rscript 38Clinical_features.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Discovery/5_Clustering_als/cluster_assignments_2.csv --output Discovery/38_Clinical_features --var sex
+# # progression group
+# Rscript 09_Clinical_features_subclusters.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Discovery/08_Clustering_als/cluster_assignments_2.csv --output Discovery/09_Clinical_features_subclusters --var progression_group
 
-# progression group
-Rscript 38Clinical_features.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Discovery/5_Clustering_als/cluster_assignments_2.csv --output Discovery/38_Clinical_features --var progression_group
+# #onset
+# Rscript 09_Clinical_features_subclusters.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Discovery/08_Clustering_als/cluster_assignments_2.csv --output Discovery/09_Clinical_features_subclusters --var condition
 
-#onset
-Rscript 38Clinical_features.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Discovery/5_Clustering_als/cluster_assignments_2.csv --output Discovery/38_Clinical_features --var condition
+# #age
+# Rscript 09_Clinical_features_subclusters.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Discovery/08_Clustering_als/cluster_assignments_2.csv --output Discovery/09_Clinical_features_subclusters --var age
 
-#age
-Rscript 38Clinical_features.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Discovery/5_Clustering_als/cluster_assignments_2.csv --output Discovery/38_Clinical_features --var age
+# #age at onset
+# Rscript 09_Clinical_features_subclusters.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Discovery/08_Clustering_als/cluster_assignments_2.csv --output Discovery/09_Clinical_features_subclusters --var age_at_onset
 
-#age at onset
-Rscript 38Clinical_features.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Discovery/5_Clustering_als/cluster_assignments_2.csv --output Discovery/38_Clinical_features --var age_at_onset
+# #Nfl
+# Rscript 09_Clinical_features_subclusters.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Discovery/08_Clustering_als/cluster_assignments_2.csv --output Discovery/09_Clinical_features_subclusters --var Nfl
 
-#Nfl
-Rscript 38Clinical_features.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Discovery/5_Clustering_als/cluster_assignments_2.csv --output Discovery/38_Clinical_features --var Nfl
+# #pNFh
+# Rscript 09_Clinical_features_subclusters.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Discovery/08_Clustering_als/cluster_assignments_2.csv --output Discovery/09_Clinical_features_subclusters --var pNFh
 
-#pNFh
-Rscript 38Clinical_features.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Discovery/5_Clustering_als/cluster_assignments_2.csv --output Discovery/38_Clinical_features --var pNFh
+# echo "Rscript 10_WGCNA_subclusters.R"
+# Rscript 10_WGCNA_subclusters.R -i Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Discovery/10_WGCNA_subclusters -e 9 -c Discovery/08_Clustering_als/cluster_assignments_2.csv
 
-########################################################### Data preparation (Validation cohort) ###########################################################
-# Validation cohort data preparation
-echo "VAlidation cohort data preparation"
-Rscript Validation_Data_prepare_updated_20250731.R
+# ########################################################### Data preparation (Validation cohort) ###########################################################
+# # Validation cohort data preparation
+# echo "Validation cohort data preparation"
+# Rscript 00_Validation_Data_Prepare.R
 
-########################################################### Data analysis (Validation cohort, All samples) ###########################################################
-# All samples
-Rscript 1Pre_processing_updated_20250731.R -i Validation/data/proteinGroups.txt -c Validation/data/clinical_info.csv -o Validation/1_pre_processing -e 9 -d Input/HUMAN_9606_idmapping_selected.tab.gz
-echo "Rscrtipt 2Missing_Inspection.R"
+# ########################################################### Data analysis (Validation cohort, All samples) ###########################################################
+# # All samples
+# Rscript 01_Pre_Processing.R -i Validation/data/proteinGroups.txt -c Validation/data/clinical_info.csv -o Validation/01_Pre_Processing -e 9 -d Input/HUMAN_9606_idmapping_selected.tab.gz
+# echo "Rscrtipt 02_Missing_Inspection.R "
 
-Rscript 2Missing_Inspection.R -i Validation/1_pre_processing/se_abu_data_filtered.rds -o Validation/2_Missing_Inspection -e 9 -s 0.01
+# Rscript 02_Missing_Inspection.R  -i Validation/01_Pre_Processing/se_abu_data_filtered.rds -o Validation/02_Missing_Inspection -e 9 -s 0.01
 
-Rscript 3Differential_expression_analysis.R -i Validation/2_Missing_Inspection/norm_imp_MinProb.rds -o Validation/3_Differential_Expression_Analysis -e 9 -u Validation/1_pre_processing/uniprot_to_genename.rds
+# Rscript 03_Differential_expression_analysis.R -i Validation/02_Missing_Inspection/norm_imp_MinProb.rds -o Validation/03_Differential_expression_analysis -e 9 -u Validation/01_Pre_Processing/uniprot_to_genename.rds
 
-Rscript 12Vis_Differential_expression_analysis.R -i Validation/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o Validation/12_Vis_Differential_expression_analysis -e 9
-Rscript 12Vis_Differential_expression_analysis_FDR_0102.R -i Validation/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o Validation/12_Vis_Differential_expression_analysis_FDR_0102 -e 9
+# Rscript 04_Vis_Differential_expression_analysis.R -i Validation/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Validation/04_Vis_Differential_expression_analysis -e 9
+# Rscript 04_Vis_Differential_expression_analysis_FDR_0102.R -i Validation/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Validation/04_Vis_Differential_expression_analysis_FDR_0102 -e 9
 
-Rscript 13Vis_umap.R -i Validation/2_Missing_Inspection -o Validation/13_Vis_umap -e 9 -d all -l TRUE
-Rscript 13Vis_umap.R -i Validation/2_Missing_Inspection -o Validation/13_Vis_umap -e 9 -d all -l FALSE
+# Rscript 05_Vis_umap.R -i Validation/02_Missing_Inspection -o Validation/05_Vis_umap -e 9 -d all -l TRUE
+# Rscript 05_Vis_umap.R -i Validation/02_Missing_Inspection -o Validation/05_Vis_umap -e 9 -d all -l FALSE
 
-Rscript 19GSEA_allsamples.R -i Validation/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o Validation/19_GSEA_allsamples
+# Rscript 06_GSEA.R -i Validation/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Validation/06_GSEA
 
-Rscript 37_Clinical_heatmap_highest_variance.R --input Validation/2_Missing_Inspection/norm_imp_MinProb.rds --output Validation/37_Clinical_heatmap_top_variable --seed 9
+# Rscript 07_Clinical_heatmap.R --input Validation/02_Missing_Inspection/norm_imp_MinProb.rds --output Validation/07_Clinical_heatmap --seed 9
 
-########################################################### Data analysis (Validation cohort, ALS only) ###########################################################
-# als only
-Rscript 1Pre_processing_updated_20250731.R -i Validation/data/proteinGroups.txt -c Validation/data/clinical_info.csv -o Validation/1_pre_processing_als -e 9 --subset als -d Input/HUMAN_9606_idmapping_selected.tab.gz
+# ########################################################### Data analysis (Validation cohort, ALS only) ###########################################################
+# # als only
+# Rscript 01_Pre_Processing.R -i Validation/data/proteinGroups.txt -c Validation/data/clinical_info.csv -o Validation/01_Pre_Processing_als -e 9 --subset als -d Input/HUMAN_9606_idmapping_selected.tab.gz
 
-Rscript 2Missing_Inspection.R -i Validation/1_pre_processing_als/se_abu_data_filtered.rds -o Validation/2_Missing_Inspection_als -e 9 -s 0.01
+# Rscript 02_Missing_Inspection.R  -i Validation/01_Pre_Processing_als/se_abu_data_filtered.rds -o Validation/02_Missing_Inspection_subclusters -e 9 -s 0.01
 
-Rscript 5Clustering_Validation_updated_20250331.R -i Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds -o Validation/5_Clustering_als -e 9
+# Rscript 08_Clustering_subclusters.R -i Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Validation/08_Clustering_als -e 9 --reverse TRUE
 
-Rscript 8Differential_expression_analysis_subclusters.R -i Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds -o Validation/8_Differential_expression_analysis_subclusters -e 9 -c Validation/5_Clustering_als/cluster_assignments_2.csv
+# Rscript 03_Differential_expression_analysis_subclusters.R -i Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Validation/03_Differential_expression_analysis_subclusters -e 9 -c Validation/08_Clustering_als/cluster_assignments_2.csv
 
-Rscript 9Vis_Differential_expression_analysis_subclusters.R -i Validation/8_Differential_expression_analysis_subclusters/res.rds -o Validation/9_Vis_Differential_expression_analysis_subclusters -d Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds -c Validation/5_Clustering_als/cluster_assignments_2.csv -e 9
+# Rscript 04_Vis_Differential_expression_analysis_subclusters.R -i Validation/03_Differential_expression_analysis_subclusters/res.rds -o Validation/04_Vis_Differential_expression_analysis_subclusters -d Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -c Validation/08_Clustering_als/cluster_assignments_2.csv -e 9
 
-Rscript 13Vis_umap.R -i Validation/2_Missing_Inspection_als -o Validation/13_Vis_umap -d als -e 9 -l TRUE -c Validation/5_Clustering_als
-Rscript 13Vis_umap.R -i Validation/2_Missing_Inspection_als -o Validation/13_Vis_umap -d als -e 9 -l FALSE -c Validation/5_Clustering_als
+# Rscript 05_Vis_umap.R -i Validation/02_Missing_Inspection_subclusters -o Validation/05_Vis_umap -d als -e 9 -l TRUE -c Validation/08_Clustering_als
+# Rscript 05_Vis_umap.R -i Validation/02_Missing_Inspection_subclusters -o Validation/05_Vis_umap -d als -e 9 -l FALSE -c Validation/08_Clustering_als
 
-Rscript 19GSEA_subclusters.R -i Validation/8_Differential_expression_analysis_subclusters/res.rds -o Validation/19_GSEA_subclusters_k2
+# Rscript 06_GSEA_subclusters.R -i Validation/03_Differential_expression_analysis_subclusters/res.rds -o Validation/06_GSEA_subclusters_k2
 
-# WGCNA using module detected in Discovery, to see it's performance in Discovery
-Rscript 23_WGCNA_comparison.R -i Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds -o Discovery/23_WGCNA_comparison --net Discovery/23_WGCNA/WGCNA_net.rds -e 9 -c Discovery/5_Clustering_als/cluster_assignments_2.csv --ModuleTrait TRUE    
+# # sex
+# Rscript 09_Clinical_features_subclusters.R --input Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Validation/08_Clustering_als/cluster_assignments_2.csv --output Validation/09_Clinical_features_subclusters --var sex
 
-# WGCNA using module detected in Discovery, to see it's performance in Validation
-Rscript 23_WGCNA_comparison.R -i Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds -o Validation/23_WGCNA_comparison --net Discovery/23_WGCNA/WGCNA_net.rds -e 9 -c Validation/5_Clustering_als/cluster_assignments_2.csv --ModuleTrait TRUE
+# # progression group
+# Rscript 09_Clinical_features_subclusters.R --input Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Validation/08_Clustering_als/cluster_assignments_2.csv --output Validation/09_Clinical_features_subclusters --var progression_group
 
-# sex
-Rscript 38Clinical_features.R --input Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Validation/5_Clustering_als/cluster_assignments_2.csv --output Validation/38_Clinical_features --var sex
+# #onset
+# Rscript 09_Clinical_features_subclusters.R --input Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Validation/08_Clustering_als/cluster_assignments_2.csv --output Validation/09_Clinical_features_subclusters --var condition
 
-# progression group
-Rscript 38Clinical_features.R --input Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Validation/5_Clustering_als/cluster_assignments_2.csv --output Validation/38_Clinical_features --var progression_group
+# #age
+# Rscript 09_Clinical_features_subclusters.R --input Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Validation/08_Clustering_als/cluster_assignments_2.csv --output Validation/09_Clinical_features_subclusters --var age
 
-#onset
-Rscript 38Clinical_features.R --input Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Validation/5_Clustering_als/cluster_assignments_2.csv --output Validation/38_Clinical_features --var condition
+# #age at onset
+# Rscript 09_Clinical_features_subclusters.R --input Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Validation/08_Clustering_als/cluster_assignments_2.csv --output Validation/09_Clinical_features_subclusters --var age_at_onset
 
-#age
-Rscript 38Clinical_features.R --input Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Validation/5_Clustering_als/cluster_assignments_2.csv --output Validation/38_Clinical_features --var age
+# #Nfl
+# Rscript 09_Clinical_features_subclusters.R --input Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds --cluster Validation/08_Clustering_als/cluster_assignments_2.csv --output Validation/09_Clinical_features_subclusters --var Nfl
 
-#age at onset
-Rscript 38Clinical_features.R --input Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Validation/5_Clustering_als/cluster_assignments_2.csv --output Validation/38_Clinical_features --var age_at_onset
+# # WGCNA using module detected in Discovery, to see it's performance in Discovery
+# Rscript 11_WGCNA_comparison_subclusters.R -i Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Discovery/11_WGCNA_comparison --net Discovery/10_WGCNA_subclusters/WGCNA_net.rds -e 9 -c Discovery/08_Clustering_als/cluster_assignments_2.csv --ModuleTrait TRUE    
 
-#Nfl
-Rscript 38Clinical_features.R --input Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds --cluster Validation/5_Clustering_als/cluster_assignments_2.csv --output Validation/38_Clinical_features --var Nfl
+# # WGCNA using module detected in Discovery, to see it's performance in Validation
+# Rscript 11_WGCNA_comparison_subclusters.R -i Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Validation/11_WGCNA_comparison --net Discovery/10_WGCNA_subclusters/WGCNA_net.rds -e 9 -c Validation/08_Clustering_als/cluster_assignments_2.csv --ModuleTrait TRUE
 
-########################################################### Between Validation and Discovery cohort ###########################################################
-#UMAP between duplicated samples
-#Rscript /Users/xliu2942/Documents/Projects/MAXOMOD/Script/24UMAP_duplicated_samples.R
+# ########################################################### Between Validation and Discovery cohort ###########################################################
+# #scatterplot
+# Rscript 12_Scatterplot_FDR.R -i 03_Differential_expression_analysis/Differential_Expression_Results.rds -o 12_Scatterplot_FDR -e 9
 
-#scatterplot
-echo "Rscript 20scatterplot_FDR_signedp_withCI.R"
-Rscript 20scatterplot_FDR_signedp_withCI.R -i 3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o 20_scatterplot_FDR_signedp_withCI -e 9
+# Rscript 12_Scatterplot_FDR_subclusters.R -i 03_Differential_expression_analysis_subclusters/res.rds -o 12_Scatterplot_FDR_subclusters
 
-Rscript 20scatterplot_FDR_signedp_withCI_alpha_vs_beta.R -i 8_Differential_expression_analysis_subclusters/res.rds
+# Rscript 12_Scatterplot_FDR_0102.R -i 03_Differential_expression_analysis/Differential_Expression_Results.rds -o 12_Scatterplot_FDR_01 -e 9 --FDR_Cutoff 0.1
 
-Rscript 20scatterplot_FDR_signedp_withCI_FDR_0102.R -i 3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o 20_scatterplot_FDR_signedp_withCI_FDR_01 -e 9 --FDR_Cutoff 0.1
+# Rscript 12_Scatterplot_FDR_0102.R -i 03_Differential_expression_analysis/Differential_Expression_Results.rds -o 12_Scatterplot_FDR_02 -e 9 --FDR_Cutoff 0.2
 
-Rscript 20scatterplot_FDR_signedp_withCI_FDR_0102.R -i 3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o 20_scatterplot_FDR_signedp_withCI_FDR_02 -e 9 --FDR_Cutoff 0.2
+# # GSEA heatmap
+# Rscript 13_GSEA_IC_heatmap.R -i Discovery=Discovery/06_GSEA/GSEA_result.rds,Validation=Validation/06_GSEA/GSEA_result.rds -o 13_GSEA_IC_heatmap -c 6
 
-# GSEA heatmap
-Rscript 36GSEA_IC_heatmap.R -i Discovery=Discovery/19_GSEA_allsamples/GSEA_result.rds,Validation=Validation/19_GSEA_allsamples/GSEA_result.rds -o 36_GSEA_IC_heatmap_ALS_VS_CTRL -c 6
+# Rscript 13_GSEA_IC_heatmap.R -i Discovery=Discovery/06_GSEA_subclusters_k2/GSEA_result.rds,Validation=Validation/06_GSEA_subclusters_k2/GSEA_result.rds -o 13_GSEA_IC_heatmap_subclusters -c 6
 
-Rscript 36GSEA_IC_heatmap.R -i Discovery=Discovery/19_GSEA_subclusters_k2/GSEA_result.rds,Validation=Validation/19_GSEA_subclusters_k2/GSEA_result.rds -o 36_GSEA_IC_heatmap_alpha_VS_beta -c 6
+# Rscript 14_Pathway_between_cohort_GSEA.R
+# Rscript 14_Pathway_between_cohort_GSEA_subclusters.R
 
-Rscript 25Pathway_between_cohort_GSEA_als_vs_ctrl.R
-Rscript 25Pathway_between_cohort_GSEA.R
+# #input file for Discovery should be "Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds"
+# #input file for Validation should be "Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds"
+# Rscript 15_ML_multi_models.R --n_boot 500 --feature_freq_cutoff 0.1 --sd_threshold 3 --output 15_ML_multi_models_500_01_noAge_3sd
+# Rscript 15_ML_multi_models.R --n_boot 500 --feature_freq_cutoff 0.2 --sd_threshold 3 --output 15_ML_multi_models_500_02_noAge_3sd
+# Rscript 15_ML_multi_models.R --n_boot 500 --feature_freq_cutoff 0.3 --sd_threshold 3 --output 15_ML_multi_models_500_03_noAge_3sd
+# Rscript 15_ML_multi_models.R --n_boot 500 --feature_freq_cutoff 0.4 --sd_threshold 3 --output 15_ML_multi_models_500_04_noAge_3sd
+# Rscript 15_ML_multi_models.R --n_boot 500 --feature_freq_cutoff 0.5 --sd_threshold 3 --output 15_ML_multi_models_500_05_noAge_3sd
+# Rscript 15_ML_multi_models.R --n_boot 500 --feature_freq_cutoff 0.6 --sd_threshold 3 --output 15_ML_multi_models_500_06_noAge_3sd
 
-#input file for Discovery should be "Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds"
-#input file for Validation should be "Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds"
 # ML Step by Step
-Rscript 31ML_multi_models_Step_by_step_test_copy.R --n_boot 500 --topn 10 --sd_threshold 3 --output 31_ML_multi_models_step_by_step_test_copy_500
-
-Rscript 31ML_multi_models_Script_20250811_noAge_errorline_updated_sd.R --n_boot 500 --feature_freq_cutoff 0.4 --sd_threshold 3 --output 31_ML_multi_models_20250915_500_04_noAge_3sd
+Rscript 16_ML_multi_models_Step_by_step.R --n_boot 500 --topn 10 --sd_threshold 3 --output 15_ML_multi_models_Step_by_step
 
 # AUC line plot
-Rscript 42AUC_comparision_noAge_sd.R
+Rscript 17_AUC_comparision.R --output_dir 17_AUC_comparision
 
-# For Discovery
-Rscript 40Correlation_LASSO_protein_vs_Clinical.R --input Discovery/2_Missing_Inspection_als/norm_imp_MinProb.rds -s 31_ML_multi_models_20250915_500_04_noAge_3sd/selected_features.txt -c Discovery/5_Clustering_als/cluster_assignments_2.csv -g Discovery/8_Differential_expression_analysis_subclusters/Differential_expression_analysis_for_k2.csv -o 40_Correlation_LASSO_protein_vs_Clinical_Discovery 
-# For Validation
-Rscript 40Correlation_LASSO_protein_vs_Clinical.R --input Validation/2_Missing_Inspection_als/norm_imp_MinProb.rds -s 31_ML_multi_models_20250915_500_04_noAge_3sd/selected_features.txt -c Validation/5_Clustering_als/cluster_assignments_2.csv -g Validation/8_Differential_expression_analysis_subclusters/Differential_expression_analysis_for_k2.csv -o 40_Correlation_LASSO_protein_vs_Clinical_Validation 
+# # For Discovery
+# Rscript 40Correlation_LASSO_protein_vs_Clinical.R --input Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -s 15_ML_multi_models/selected_features.txt -c Discovery/08_Clustering_als/cluster_assignments_2.csv -g Discovery/03_Differential_expression_analysis_subclusters/Differential_expression_analysis_for_k2.csv -o 40_Correlation_LASSO_protein_vs_Clinical_Discovery 
+# # For Validation
+# Rscript 40Correlation_LASSO_protein_vs_Clinical.R --input Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -s 15_ML_multi_models/selected_features.txt -c Validation/08_Clustering_als/cluster_assignments_2.csv -g Validation/03_Differential_expression_analysis_subclusters/Differential_expression_analysis_for_k2.csv -o 40_Correlation_LASSO_protein_vs_Clinical_Validation 
 
 ########################################################### External Cohort ###########################################################
-Rscript 26External_data.R
+Rscript 18_External.R
 
-Rscript 26External_GSEA_allsamples.R -i 26External_data/als_vs_ctrl.csv -o 26External_data/26_External_GSEA_allsamples
-Rscript 26External_GSEA_subclusters.R -i 26External_data/alpha_vs_beta_als.csv -o 26External_data/26_External_GSEA_subclusters_k2
+Rscript 18_GSEA_External.R -i External/als_vs_ctrl.csv -o External/18_GSEA_External
+Rscript 18_GSEA_External_subclusters.R -i External/alpha_vs_beta_als.csv -o External/18_GSEA_External_subclusters_k2
 
-Rscript 26External_protein_expression.R -i 26External_data/norm_imp_MinProb_als.rds --features 31_ML_multi_models_20250915_500_04_noAge_3sd/selected_features.txt -o 26External_data/26External_protein_expression/
+Rscript 18_External_protein_expression.R -i External/norm_imp_MinProb_als.rds --features 15_ML_multi_models_500_04_noAge_3sd/selected_features.txt -o External/18_External_protein_expression/
 
 # WGCNA using module detected in Discovery, to see it's performance in External Cohort
-Rscript 23_WGCNA_comparison.R -i 26External_data/norm_imp_MinProb_als.rds -o 26External_data/23_WGCNA_comparison --net Discovery/23_WGCNA/WGCNA_net.rds -e 9 -c 26External_data/cluster_assignments_2.csv
+Rscript 11_WGCNA_comparison_subclusters.R -i External/norm_imp_MinProb_als.rds -o External/11_WGCNA_comparison --net Discovery/10_WGCNA_subclusters/WGCNA_net.rds -e 9 -c External/cluster_assignments_2.csv
 
-Rscript 36GSEA_IC_heatmap.R -i Discovery=Discovery/19_GSEA_subclusters_k2/GSEA_result.rds,Validation=Validation/19_GSEA_subclusters_k2/GSEA_result.rds,External_data=26External_data/26_External_GSEA_subclusters_k2/GSEA_result.rds -o 36_GSEA_IC_heatmap_alpha_VS_beta_all_cohorts -c 6
+Rscript 13_GSEA_IC_heatmap.R -i Discovery=Discovery/06_GSEA_subclusters_k2/GSEA_result.rds,Validation=Validation/06_GSEA_subclusters_k2/GSEA_result.rds,External=External/18_GSEA_External_subclusters_k2/GSEA_result.rds -o 13_GSEA_IC_heatmap_subclusters_all_cohorts -c 6
 
 ########################################################### Brain data ###########################################################
-Rscript 28_Brain_data_preprocessing.R
+Rscript 19_Brain.R
 
 # All samples
-Rscript 3Differential_expression_analysis.R -i 28_Brain_data/2_Missing_Inspection/norm_imp_MinProb.rds -o 28_Brain_data/3_Differential_Expression_Analysis -e 9 -u 28_Brain_data/1_pre_processing/uniprot_to_genename.rds
+Rscript 03_Differential_expression_analysis.R -i Brain/02_Missing_Inspection/norm_imp_MinProb.rds -o Brain/03_Differential_expression_analysis -e 9 -u Brain/01_Pre_Processing/uniprot_to_genename.rds
 
-Rscript 12Vis_Differential_expression_analysis.R -i 28_Brain_data/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o 28_Brain_data/12_Vis_Differential_expression_analysis -e 9
+Rscript 04_Vis_Differential_expression_analysis.R -i Brain/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Brain/04_Vis_Differential_expression_analysis -e 9
 
-Rscript 13Vis_umap.R -i 28_Brain_data/2_Missing_Inspection -o 28_Brain_data/13_Vis_umap -e 9 -d all -l TRUE
+Rscript 05_Vis_umap.R -i Brain/02_Missing_Inspection -o Brain/05_Vis_umap -e 9 -d all -l TRUE
 
-Rscript 13Vis_umap.R -i 28_Brain_data/2_Missing_Inspection -o 28_Brain_data/13_Vis_umap -e 9 -d all -l FALSE
+Rscript 05_Vis_umap.R -i Brain/02_Missing_Inspection -o Brain/05_Vis_umap -e 9 -d all -l FALSE
 
-Rscript 19GSEA_allsamples.R -i 28_Brain_data/3_Differential_Expression_Analysis/Differential_Expression_Results.rds -o 28_Brain_data/19_GSEA_allsamples
+Rscript 06_GSEA.R -i Brain/03_Differential_expression_analysis/Differential_Expression_Results.rds -o Brain/06_GSEA
 
 # als only
 # this script is used to cluster the als samples, without NFL information
-Rscript 5Clustering_updated_20250512_brain_clustering.R -i 28_Brain_data/2_Missing_Inspection_als/norm_imp_MinProb.rds -o 28_Brain_data/5_Clustering_als -e 9
+Rscript 08_Clustering_subclusters_brain.R -i Brain/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Brain/08_Clustering_als -e 9
 
-Rscript 8Differential_expression_analysis_subclusters.R -i 28_Brain_data/2_Missing_Inspection_als/norm_imp_MinProb.rds -o 28_Brain_data/8_Differential_expression_analysis_subclusters -e 9 -c 28_Brain_data/5_Clustering_als/cluster_assignments_2.csv
+Rscript 03_Differential_expression_analysis_subclusters.R -i Brain/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -o Brain/03_Differential_expression_analysis_subclusters -e 9 -c Brain/08_Clustering_als/cluster_assignments_2.csv
 
 # when k =3, there is no alpha or theta subcluster specific proteins, therefore, cannot draw the expression heatmap. This will return an error.
-Rscript 9Vis_Differential_expression_analysis_subclusters.R -i 28_Brain_data/8_Differential_expression_analysis_subclusters/res.rds -o 28_Brain_data/9_Vis_Differential_expression_analysis_subclusters -d 28_Brain_data/2_Missing_Inspection_als/norm_imp_MinProb.rds -c 28_Brain_data/5_Clustering_als/cluster_assignments_2.csv -e 9
+Rscript 04_Vis_Differential_expression_analysis_subclusters.R -i Brain/03_Differential_expression_analysis_subclusters/res.rds -o Brain/04_Vis_Differential_expression_analysis_subclusters -d Brain/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -c Brain/08_Clustering_als/cluster_assignments_2.csv -e 9
 
-Rscript 13Vis_umap.R -i 28_Brain_data/2_Missing_Inspection_als -o 28_Brain_data/13_Vis_umap -d als -e 9 -l TRUE -c 28_Brain_data/5_Clustering_als
-Rscript 13Vis_umap.R -i 28_Brain_data/2_Missing_Inspection_als -o 28_Brain_data/13_Vis_umap -d als -e 9 -l FALSE -c 28_Brain_data/5_Clustering_als
+Rscript 05_Vis_umap.R -i Brain/02_Missing_Inspection_subclusters -o Brain/05_Vis_umap -d als -e 9 -l TRUE -c Brain/08_Clustering_als
+Rscript 05_Vis_umap.R -i Brain/02_Missing_Inspection_subclusters -o Brain/05_Vis_umap -d als -e 9 -l FALSE -c Brain/08_Clustering_als
 
-Rscript 19GSEA_subclusters.R -i 28_Brain_data/8_Differential_expression_analysis_subclusters/res.rds -o 28_Brain_data/19_GSEA_subclusters_k2
+Rscript 06_GSEA_subclusters.R -i Brain/03_Differential_expression_analysis_subclusters/res.rds -o Brain/06_GSEA_subclusters_k2
 
-Rscript 36GSEA_IC_heatmap.R -i Brain=28_Brain_data/19_GSEA_subclusters_k2/GSEA_result.rds -o 28_Brain_data/36_GSEA_IC_heatmap_alpha_VS_beta -c 6
+Rscript 13_GSEA_IC_heatmap.R -i Brain=Brain/06_GSEA_subclusters_k2/GSEA_result.rds -o Brain/13_GSEA_IC_heatmap_subclusters -c 6
