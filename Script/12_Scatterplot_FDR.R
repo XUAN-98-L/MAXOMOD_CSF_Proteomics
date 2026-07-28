@@ -152,6 +152,7 @@ ggsave(paste0(output_dir, "/ALS_vs_Control.pdf"), p, width = 6, height = 4, dpi 
 
 sink(paste0(output_dir, "/FDR_cor.txt"))
 cor.test(data$x, data$y, method = "pearson")
+cor.test(data$x, data$y, method = "spearman")
 sink()
 
 
@@ -180,4 +181,5 @@ ggsave(paste0(output_dir, "/ALS_vs_Control_pvalue.pdf"), p, width = 6, height = 
 
 sink(paste0(output_dir, "/pvalue_cor.txt"))
 cor.test(data$x, data$y, method = "pearson")
+cor.test(data$x, data$y, method = "spearman")
 sink()

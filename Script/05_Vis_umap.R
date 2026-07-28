@@ -1,6 +1,8 @@
 #=========================Script Description=================================
 # This script is used for visualize differential expression analysis between als vs ctrl result (volcano plot)
 # Rscript 05_Vis_umap.R -i Discovery/02_Missing_Inspection -o Discovery/05_Vis_umap -e 9 -d all -l TRUE
+# Plot a single colouring variable only:
+# Rscript 05_Vis_umap.R -i Discovery/02_Missing_Inspection_subclusters -o Discovery/05_Vis_umap -d als -c Discovery/08_Clustering_als -v kmeans_k=3
 #===========================Loading Packages=============================
 suppressMessages(library("optparse"))
 suppressMessages(library("dplyr"))
@@ -122,6 +124,9 @@ option_list <- list(
   ),make_option(c("--label", "-l"), 
                 type = "logical",default = TRUE,
                 help = "whether to add patient labels to the UMAP plot"
+  ),make_option(c("--variable", "-v"),
+                type = "character", default = NULL,
+                help = "optional: plot only this colouring variable (e.g. Condition, Sex, Age, Onset, Center, kmeans_k=2, kmeans_k=3, or any colData column). Default: plot all."
   )
 )
 opt_parser <- OptionParser(option_list = option_list)
@@ -190,6 +195,55 @@ generate_umap_plots <- function(assay_data, output_dir, condition, label_file_na
   }
 }
 
+# Restrict labels_list / colour_list to a single requested variable, or pull it
+# from colData if it is not already among the default plot variables.
+select_variable <- function(var_name, labels_list, colour_list, data) {
+  if (is.null(var_name)) {
+    return(list(labels_list = labels_list, colour_list = colour_list))
+  }
+
+  if (var_name %in% names(labels_list)) {
+    return(list(labels_list = labels_list[var_name],
+                colour_list = colour_list[var_name]))
+  }
+
+  if (var_name %in% colnames(colData(data))) {
+    vals = colData(data)[[var_name]]
+    if (!is.factor(vals)) vals = factor(vals)
+    vals = droplevels(vals)
+    nlev = nlevels(vals)
+    if (nlev < 1) {
+      stop("Variable '", var_name, "' has no non-missing levels to plot.")
+    }
+    # batchid uses the same site labels as center (goettingen/munich)
+    if (var_name %in% c("batchid", "center", "centre")) {
+      pal = final_colours$center[intersect(names(final_colours$center), levels(vals))]
+      # keep any unexpected levels with a fallback colour
+      missing_lev = setdiff(levels(vals), names(pal))
+      if (length(missing_lev) > 0) {
+        extra = setNames(rep("#B3B3B3", length(missing_lev)), missing_lev)
+        pal = c(pal, extra)
+      }
+    } else {
+      pal = if (nlev <= 8) {
+        brewer.pal(max(3, nlev), "Set2")[seq_len(nlev)]
+      } else {
+        colorRampPalette(brewer.pal(8, "Set2"))(nlev)
+      }
+      names(pal) = levels(vals)
+    }
+    labels_list = setNames(list(vals), var_name)
+    colour_list = setNames(list(pal), var_name)
+    message("Using colData column '", var_name, "' with ", nlev, " level(s).")
+    return(list(labels_list = labels_list, colour_list = colour_list))
+  }
+
+  stop("Variable '", var_name, "' not found. Available plot variables: ",
+       paste(names(labels_list), collapse = ", "),
+       "; or any colData column: ",
+       paste(colnames(colData(data)), collapse = ", "))
+}
+
 #=========================== Main Script =====================================
 if (condition == "als") {
   # Define labels
@@ -213,9 +267,6 @@ if (condition == "als") {
     "kmeans_k=3" = final_colours$clustering[names(final_colours$clustering) %in% levels(labels_list$`kmeans_k=3`)]
   )
   
-  # Generate UMAP plots
-  generate_umap_plots(assay_data, output_dir, condition, label_file_name, labels_list, colour_list, patients_label)
-  
 } else if (condition == "ctrl") {
   # Define labels
   labels_list <- list(
@@ -237,9 +288,6 @@ if (condition == "als") {
     "kmeans_k=2" = final_colours$clustering[names(final_colours$clustering) %in% levels(labels_list$`kmeans_k=2`)],
     "kmeans_k=3" = final_colours$clustering[names(final_colours$clustering) %in% levels(labels_list$`kmeans_k=3`)]
   )
-  
-  # Generate UMAP plots
-  generate_umap_plots(assay_data, output_dir, condition, label_file_name, labels_list, colour_list, patients_label)
   
 } else if (condition == "all") {
   # Define labels
@@ -274,9 +322,10 @@ if (condition == "als") {
     colour_list$Center <- final_colours$center
   }
   
-  # Generate UMAP plots
-  generate_umap_plots(assay_data, output_dir, condition, label_file_name, labels_list, colour_list, patients_label)
-  
 } else {
   stop("Please provide the correct condition information!")
 }
+
+selected = select_variable(opt$variable, labels_list, colour_list, data)
+generate_umap_plots(assay_data, output_dir, condition, label_file_name,
+                    selected$labels_list, selected$colour_list, patients_label)
