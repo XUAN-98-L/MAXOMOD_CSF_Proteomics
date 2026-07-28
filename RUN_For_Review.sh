@@ -70,3 +70,6 @@ Rscript Script/34_subcluster_vsCTR_GSEA.R -i Discovery/32_subcluster_vsCTR/Diffe
 Rscript Script/34_subcluster_vsCTR_GSEA.R -i Validation/32_subcluster_vsCTR/Differential_Expression_Results.rds -o Validation/34_subcluster_vsCTR_GSEA -e 9
 
 Rscript Script/35_subcluster_vsCTR_GSEA_vis.R -D Discovery/34_subcluster_vsCTR_GSEA -V Validation/34_subcluster_vsCTR_GSEA -o 35_subcluster_vsCTR_GSEA_vis -e 9
+
+Rscript Script/36_MA_plot.R -f 0.05 -o 36_MA_plot -e 9
+Rscript Script/36_MA_plot.R -s p.val -f 0.05 -o 36_MA_plot_pval -e 9
