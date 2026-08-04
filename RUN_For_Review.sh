@@ -44,7 +44,7 @@ Rscript Script/29_missing_per_protein.R -o 29_missing_per_protein -e 9
 
 Rscript Script/30_GSVA.R -i Discovery/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -c Discovery/08_Clustering_als/cluster_assignments_2.csv -e 9 -o Discovery/30_GSVA -u Discovery/01_Pre_Processing_als/uniprot_to_genename.rds -s GO_BP --number 5 --width 10
 
-Rscript Script/30_GSVA.R -i Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -c Validation/08_Clustering_als/cluster_assignments_2.csv -e 9 -o Validation/30_GSVA -u Validation/01_Pre_Processing_als/uniprot_to_genename.rds -s GO_BP --number 3 --width 10
+Rscript Script/30_GSVA.R -i Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -c Validation/08_Clustering_als/cluster_assignments_2.csv -e 9 -o Validation/30_GSVA -u Validation/01_Pre_Processing_als/uniprot_to_genename.rds -s GO_BP --number 3 --width 7
 
 Rscript Script/31_NEFL.R -o 31_NEFL -e 9
 

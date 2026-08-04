@@ -130,7 +130,9 @@ res = scatterplot_intensity(data, q = 0.97, #main_title = "Protein Intensity: Di
                             max.overlaps = Inf)
 
 ggsave(paste0(output_dir, "/Scatter_intensity_Discovery_vs_Validation.pdf"), res$plot,
-       width = 6, height = 5, device = cairo_pdf)
+       width = 6, height = 5)
+ggsave(paste0(output_dir, "/Scatter_intensity_Discovery_vs_Validation.svg"), res$plot,
+       width = 6, height = 5)
 
 sink(paste0(output_dir, "/intensity_cor.txt"))
 print(res$pearson)

@@ -134,6 +134,35 @@ format_pathway_label <- function(term, max_length = 60) {
   }
 }
 
+# Fixed colors for Cluster (min IC) legend so shared pathway names keep the
+# same color across Discovery / Validation heatmaps. Keys are the formatted
+# labels from format_pathway_label(). Discovery colors follow pal_d3 order
+# from the Discovery figure; Phosphorylation uses an unused pal_d3 color.
+CLUSTER_SUMMARY_COLORS = c(
+  "Cellular Response To Oxygen Containing Compound" = "#1F77B4",
+  "Negative Regulation Of Cellular Component Organization" = "#FF7F0E",
+  "Cellular Response To Stress" = "#2CA02C",
+  "Immune Response" = "#D62728",
+  "Regulation Of Immune System Process" = "#9467BD",
+  "Phosphorylation" = "#17BECF"
+)
+
+# Assign colors to pathway-cluster labels: prefer CLUSTER_SUMMARY_COLORS,
+# then fill any remaining labels from unused pal_d3 colors.
+assign_cluster_summary_colors = function(labels) {
+  labels = as.character(labels)
+  fixed = CLUSTER_SUMMARY_COLORS[intersect(labels, names(CLUSTER_SUMMARY_COLORS))]
+  remaining_labels = setdiff(labels, names(CLUSTER_SUMMARY_COLORS))
+  palette = substr(ggsci::pal_d3("category20")(20), 1, 7)
+  unused_palette = setdiff(palette, unname(fixed))
+  if (length(remaining_labels) > length(unused_palette)) {
+    stop("Not enough fallback colors for cluster summary labels.")
+  }
+  fallback = setNames(unused_palette[seq_along(remaining_labels)], remaining_labels)
+  out = c(fixed, fallback)
+  out[labels]
+}
+
 # Custom function to abbreviate long terms by adding "..." at the end
 abbreviate_terms_end <- function(term, max_length = 60) {
   format_pathway_label(term, max_length = max_length)
@@ -278,7 +307,15 @@ run_gsva_geneset_analysis = function(gs_subcat, output_suffix, label_for_message
   cluster_means = as.matrix(cluster_means[, c("alpha", "beta", "theta"), drop = FALSE])
 
   # Star mark: pathway in a cluster is significant vs both other clusters
-  # (both pairwise limma adj.P.Val < 0.05, consistent direction)
+  # (consistent direction); star level from the weaker (max) of the two
+  # pairwise limma adj.P.Val, matching 10_WGCNA_subclusters.R thresholds
+  pval_to_stars = function(p) {
+    if (is.na(p)) return("")
+    else if (p < 0.001) return("***")
+    else if (p < 0.01) return("**")
+    else if (p < 0.05) return("*")
+    else return("")
+  }
   star_mat = matrix("", nrow = nrow(cluster_means), ncol = ncol(cluster_means),
                     dimnames = dimnames(cluster_means))
   for (term in rownames(cluster_means)) {
@@ -291,21 +328,18 @@ run_gsva_geneset_analysis = function(gs_subcat, output_suffix, label_for_message
 
     # alpha vs beta & theta: same sign of (alpha-beta) and (alpha-theta)
     if (!anyNA(c(ab_p, at_p, ab_fc, at_fc)) &&
-        ab_p < 0.05 && at_p < 0.05 &&
         sign(ab_fc) == sign(at_fc) && sign(ab_fc) != 0) {
-      star_mat[term, "alpha"] = "*"
+      star_mat[term, "alpha"] = pval_to_stars(max(ab_p, at_p))
     }
     # beta vs alpha & theta: same sign of (alpha-beta) and (theta-beta)
     if (!anyNA(c(ab_p, tb_p, ab_fc, tb_fc)) &&
-        ab_p < 0.05 && tb_p < 0.05 &&
         sign(ab_fc) == sign(tb_fc) && sign(ab_fc) != 0) {
-      star_mat[term, "beta"] = "*"
+      star_mat[term, "beta"] = pval_to_stars(max(ab_p, tb_p))
     }
     # theta vs alpha & beta: (alpha-theta) and (theta-beta) opposite signs
     if (!anyNA(c(at_p, tb_p, at_fc, tb_fc)) &&
-        at_p < 0.05 && tb_p < 0.05 &&
         sign(at_fc) == -sign(tb_fc) && sign(at_fc) != 0) {
-      star_mat[term, "theta"] = "*"
+      star_mat[term, "theta"] = pval_to_stars(max(at_p, tb_p))
     }
   }
 
@@ -396,7 +430,7 @@ run_gsva_geneset_analysis = function(gs_subcat, output_suffix, label_for_message
   )
   names(row_annot) = names(row_clusters)
 
-  cluster_colors = ggsci::pal_d3("category20")(n_cut_use)
+  cluster_colors = assign_cluster_summary_colors(levels(row_annot))
   names(cluster_colors) = levels(row_annot)
 
   left_annot = rowAnnotation(
@@ -447,13 +481,17 @@ run_gsva_geneset_analysis = function(gs_subcat, output_suffix, label_for_message
     plot_height
   }
   pdf(file.path(output_dir, paste0("GSVA_mean_k3", output_suffix, ".pdf")), width = plot_width, height = pdf_height)
-  draw(pathway_heatmap_mean,
-       annotation_legend_list = list(
-         Legend(title = "limma",
-                labels = "* sig. vs other two\n  (adj.P < 0.05)",
-                type = "points", pch = 8,
-                background = "white")
-       ))
+  draw(pathway_heatmap_mean
+  # ,
+  #      annotation_legend_list = list(
+  #        Legend(title = "limma (vs other two)",
+  #               labels = c("*** adj.P < 0.001",
+  #                          "**  adj.P < 0.01",
+  #                          "*   adj.P < 0.05"),
+  #               type = "points", pch = 8,
+  #               background = "white")
+  #      )
+       )
   dev.off()
 
   invisible(NULL)
