@@ -204,7 +204,9 @@ MEs <- MEs[, colnames(MEs) != "MEgrey"]
 colnames(MEs) <- substr(colnames(MEs),3,100)
 
 # reorder to the same order as DC
-MEs = MEs[, setdiff(substr(colnames(net$MEs), 3, 100), "grey")]
+#MEs = MEs[, setdiff(substr(colnames(net$MEs), 3, 100), "grey")]
+dc_order <- setdiff(substr(colnames(net$MEs), 3, 100), "grey")
+MEs <- MEs[, intersect(dc_order, colnames(MEs)), drop = FALSE]
 
 # Generate plots for k2
 data_k2 <- prepare_toplot(MEs, cluster_assignments_2_file, metaData, "k2", ModuleTrait = ModuleTrait)

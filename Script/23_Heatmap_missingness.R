@@ -116,7 +116,7 @@ build_missingness_heatmap = function(se_disc, se_val, panel_title){
     col = list(Protein = c("Shared" = "mediumpurple1",
                           "Discovery only" = "salmon",
                           "Validation only" = "#26b3ff")),
-    annotation_name_side = "top",
+    show_annotation_name = FALSE,
     simple_anno_size = unit(4, "mm")
   )
 

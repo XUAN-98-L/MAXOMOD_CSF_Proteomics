@@ -3,17 +3,27 @@
 # reproducibility in ALS vs. Controls.
 #
 # To assess whether ALS-associated protein changes were reproducible between
-# independent cohorts, proteins in the discovery (y-axis) and validation
-# (x-axis) datasets were each ranked by signed -log10(nominal P-value), with
+# independent cohorts, proteins in the discovery (x-axis) and validation
+# (y-axis) datasets were each ranked by signed -log10(nominal P-value), with
 # the sign indicating the direction of change in ALS relative to controls
 # (positive = up-regulated in ALS, negative = down-regulated in ALS).
 #
-# Heatmap color intensity indicates the statistical significance of overlap
-# between the ranked lists at each pair of rank thresholds (hypergeometric
-# test). For display, the matrix is rotated 180 degrees so that warm colors
-# in the upper-right = concordant up-up (uu) and lower-left = concordant
-# down-down (dd); the other two quadrants (ud/du) are discordant. The
-# returned RRHO object keeps the unflipped hypermat so gene lists stay aligned.
+# Discovery is plotted on the x-axis, Validation on the y-axis (Discovery is
+# passed as list_x/list1, Validation as list_y/list2 below). Heatmap color
+# intensity indicates the statistical significance of overlap between the
+# ranked lists at each pair of rank thresholds (hypergeometric test). For
+# display, the matrix is rotated 180 degrees so that warm colors in the
+# upper-right = concordant up-up (uu) and lower-left = concordant down-down
+# (dd). The other two quadrants are discordant:
+#   top-left    = down in Discovery, up in Validation   ("du")
+#   bottom-right = up in Discovery,   down in Validation ("ud")
+# Because Discovery = list1 and Validation = list2 here, RRHO2's own
+# internal genelist_ud/genelist_du fields (which follow [list1][list2]
+# order) already match this project's [Discovery][Validation] labelling
+# convention directly -- no relabelling/swapping is needed downstream (this
+# was NOT the case in an earlier version of this script where Validation
+# was list1/x-axis instead).
+# The returned RRHO object keeps the unflipped hypermat so gene lists stay aligned.
 #
 # Requires the RRHO2 package (not on CRAN):
 #   remotes::install_github("RRHO2/RRHO2")
@@ -22,7 +32,94 @@ suppressMessages(library("optparse"))
 suppressMessages(library("data.table"))
 suppressMessages(library("RRHO2"))
 suppressMessages(library("openxlsx"))
+suppressMessages(library("ggplot2"))
+suppressMessages(library("grid"))
 #===========================Function Definition=============================
+# Quadrant-direction legend (Discovery x Validation, up/down x up/down),
+# drawn to match the ACTUAL displayed orientation of the 180-degree-flipped
+# heatmap above -- NOT RRHO2's native/unflipped orientation. Discovery is
+# the x-axis, Validation is the y-axis. In the flipped heatmap: x-axis
+# (Discovery) runs down-regulated (left) -> up-regulated (right); y-axis
+# (Validation) runs down-regulated (bottom) -> up-regulated (top). So
+# concordant up-up sits top-right, concordant down-down sits bottom-left,
+# and the two discordant quadrants are top-left (down-Discovery/up-
+# Validation, "du") and bottom-right (up-Discovery/down-Validation, "ud")
+# -- matching the RRHO2_summary.csv / RRHO2_overlap_proteins_ud.csv /
+# _du.csv naming below.
+rrho2_quadrant_legend = function(){
+  n_grad = 200
+
+  # y-axis gradient bar (Validation): bottom = down-regulated (blue), top = up-regulated (red)
+  y_bar = data.frame(
+    ymin = seq(0, 8, length.out = n_grad + 1)[-(n_grad + 1)],
+    ymax = seq(0, 8, length.out = n_grad + 1)[-1]
+  )
+  y_bar$value = seq(-1, 1, length.out = n_grad)
+
+  # x-axis gradient bar (Discovery): left = down-regulated (blue), right = up-regulated (red)
+  x_bar = data.frame(
+    xmin = seq(0, 8, length.out = n_grad + 1)[-(n_grad + 1)],
+    xmax = seq(0, 8, length.out = n_grad + 1)[-1]
+  )
+  x_bar$value = seq(-1, 1, length.out = n_grad)
+
+  grad_colors = c("#3366CC", "white", "#CC3333")  # down (blue) - mid - up (red)
+
+  # one row per (quadrant, cohort): arrow position/direction + quadrant label
+  quadrants = data.frame(
+    quadrant = rep(c("bottom-left", "top-right", "top-left", "bottom-right"), each = 2),
+    cohort   = rep(c("Discovery", "Validation"), times = 4),
+    cx       = rep(c(2, 6, 2, 6), each = 2),
+    cy       = rep(c(2, 6, 6, 2), each = 2),
+    direction = c("down", "down",  "up",   "up",
+                 "down", "up",    "up",   "down"),
+    concordance = rep(c("Concordant", "Concordant", "Discordant", "Discordant"), each = 2),
+    stringsAsFactors = FALSE
+  )
+  # offset the two cohorts' arrows so they sit side by side within each quadrant
+  quadrants$x = quadrants$cx + ifelse(quadrants$cohort == "Discovery", -0.7, 0.7)
+  quadrants$yend = ifelse(quadrants$direction == "up", quadrants$cy + 0.9, quadrants$cy - 0.9)
+  quadrants$ystart = ifelse(quadrants$direction == "up", quadrants$cy - 0.9, quadrants$cy + 0.9)
+  # cohort label sits to the LEFT of its arrow, vertically centred on the
+  # arrow (arrows are symmetric +-0.9 around cy, so the midpoint is just cy)
+  quadrants$label_x = quadrants$x - 0.22
+  quadrants$label_y = quadrants$cy
+
+  quad_labels = data.frame(
+    x = c(2, 6, 2, 6), y = c(2, 6, 6, 2) - 1.6,
+    label = c("Concordant", "Concordant", "Discordant", "Discordant")
+  )
+
+  p = ggplot() +
+    # axis gradient bars
+    geom_rect(data = y_bar, aes(xmin = -1.3, xmax = -0.5, ymin = ymin, ymax = ymax, fill = value)) +
+    geom_rect(data = x_bar, aes(ymin = -1.3, ymax = -0.5, xmin = xmin, xmax = xmax, fill = value)) +
+    scale_fill_gradientn(colours = grad_colors, guide = "none") +
+    # outer box + quadrant divider
+    annotate("rect", xmin = 0, xmax = 8, ymin = 0, ymax = 8, fill = NA, colour = "black", linewidth = 0.6) +
+    annotate("segment", x = 4, xend = 4, y = 0, yend = 8, colour = "black", linewidth = 0.4) +
+    annotate("segment", x = 0, xend = 8, y = 4, yend = 4, colour = "black", linewidth = 0.4) +
+    # per-cohort arrows + labels (label left-of-arrow, vertically centred)
+    geom_segment(data = quadrants,
+                aes(x = x, xend = x, y = ystart, yend = yend),
+                arrow = arrow(length = unit(0.08, "cm"), type = "closed"),
+                linewidth = 0.4) +
+    geom_text(data = quadrants, aes(x = label_x, y = label_y, label = cohort),
+             size = 1.8, angle = 90) +
+    geom_text(data = quad_labels, aes(x = x, y = y, label = label), size = 2.8, fontface = "italic") +
+    # axis text labels (rotated to match the reference RRHO2 legend style).
+    # y-axis (Validation): bottom (y=2, blue part of the bar) = Downregulated,
+    # top (y=6, red part) = Upregulated. x-axis (Discovery): left (x=2,
+    # blue) = Downregulated, right (x=6, red) = Upregulated.
+    annotate("text", x = -2.1, y = 2, label = "Downregulated", angle = 90, colour = "#3366CC", size = 2.4, fontface = "italic") +
+    annotate("text", x = -2.1, y = 6, label = "Upregulated", angle = 90, colour = "#CC3333", size = 2.4, fontface = "italic") +
+    annotate("text", x = 2, y = -2.1, label = "Downregulated", colour = "#3366CC", size = 2.4, fontface = "italic") +
+    annotate("text", x = 6, y = -2.1, label = "Upregulated", colour = "#CC3333", size = 2.4, fontface = "italic") +
+    coord_fixed(xlim = c(-2.8, 8.5), ylim = c(-2.8, 8.5), clip = "off") +
+    theme_void()
+
+  return(p)}
+
 # Build a signed -log10(nominal p-value) rank score for RRHO2.
 # Positive = up-regulated in ALS vs Control, negative = down-regulated.
 signed_log10p = function(p_val, diff){
@@ -40,7 +137,7 @@ signed_log10p = function(p_val, diff){
 # genelist_uu/dd/ud/du remain correctly indexed.
 rrho2_plot = function(list_x,
                       list_y,
-                      labels = c("Validation", "Discovery"),
+                      labels = c("Discovery", "Validation"),
                       main_title = "RRHO2: ALS vs Control",
                       stepsize = 1,
                       log10.ind = TRUE,
@@ -135,16 +232,20 @@ complete_names = intersect(discovery_list$name[complete.cases(discovery_list)],
 discovery_list = discovery_list[discovery_list$name %in% complete_names,]
 validation_list = validation_list[validation_list$name %in% complete_names,]
 
-# x-axis = Validation, y-axis = Discovery
+# x-axis = Discovery, y-axis = Validation
 # stepsize=1 gives one pixel per protein rank (finest resolution)
 pdf(paste0(output_dir, "/RRHO2_heatmap.pdf"), width = 7, height = 6)
-RRHO_obj = rrho2_plot(validation_list, discovery_list,
-                      labels = c("Validation", "Discovery"),
+RRHO_obj = rrho2_plot(discovery_list, validation_list,
+                      labels = c("Discovery", "Validation"),
                       main_title = "RRHO2: ALS vs Control",
                       stepsize = opt$stepsize)
 dev.off()
 
 saveRDS(RRHO_obj, paste0(output_dir, "/RRHO2_obj.rds"))
+
+# Quadrant-direction legend matching the heatmap's displayed orientation
+legend_plot = rrho2_quadrant_legend()
+ggsave(paste0(output_dir, "/RRHO2_quadrant_legend.pdf"), legend_plot, width = 3, height = 3)
 
 # Summary table at the most significant UU pixel (rank thresholds from that pixel)
 max_neg_log_p = max(RRHO_obj$hypermat, na.rm = TRUE)
@@ -156,11 +257,17 @@ rrho2_summary = data.frame(
   method = RRHO_obj$method,
   max_neg_log_p = max_neg_log_p,
   min_hypergeometric_p = min_hypergeometric_p,
-  # list1 = Validation (x), list2 = Discovery (y)
-  rank_threshold_discovery = length(RRHO_obj$genelist_uu$gene_list2_uu),
-  rank_threshold_validation = length(RRHO_obj$genelist_uu$gene_list1_uu),
+  # list1 = Discovery (x), list2 = Validation (y)
+  rank_threshold_discovery = length(RRHO_obj$genelist_uu$gene_list1_uu),
+  rank_threshold_validation = length(RRHO_obj$genelist_uu$gene_list2_uu),
   overlap_uu = length(RRHO_obj$genelist_uu$gene_list_overlap_uu),
   overlap_dd = length(RRHO_obj$genelist_dd$gene_list_overlap_dd),
+  # RRHO2's own internal "ud"/"du" fields follow [list1=Discovery][list2=
+  # Validation] order, which is now the SAME order as this project's
+  # [Discovery][Validation] convention -- so, unlike an earlier version of
+  # this script (when Validation was list1/x-axis), no swap is needed here:
+  #   overlap_ud = up-Discovery,   down-Validation = RRHO2's genelist_ud (direct)
+  #   overlap_du = down-Discovery, up-Validation   = RRHO2's genelist_du (direct)
   overlap_ud = length(RRHO_obj$genelist_ud$gene_list_overlap_ud),
   overlap_du = length(RRHO_obj$genelist_du$gene_list_overlap_du),
   stringsAsFactors = FALSE
@@ -173,7 +280,12 @@ write.csv(rrho2_summary,
           file = paste0(output_dir, "/RRHO2_summary.csv"),
           row.names = FALSE)
 
-# Overlap proteins at the most significant pixel of each quadrant (uu/dd/ud/du)
+# Overlap proteins at the most significant pixel of each quadrant (uu/dd/ud/du).
+# ud/du are named in [Discovery][Validation] order, which now matches
+# RRHO2's own internal genelist_ud/genelist_du fields directly (list1 =
+# Discovery, list2 = Validation), so no swap is needed:
+#   "ud" file = up-Discovery,   down-Validation = RRHO2's genelist_ud (direct)
+#   "du" file = down-Discovery, up-Validation   = RRHO2's genelist_du (direct)
 overlap_proteins = list(
   uu = data.frame(protein = RRHO_obj$genelist_uu$gene_list_overlap_uu, stringsAsFactors = FALSE),
   dd = data.frame(protein = RRHO_obj$genelist_dd$gene_list_overlap_dd, stringsAsFactors = FALSE),

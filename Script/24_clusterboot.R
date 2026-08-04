@@ -75,9 +75,11 @@ plot_mean_jaccard_by_k = function(by_k, B, cutoff){
   ggplot(by_k, aes(x = k, y = mean_jaccard)) +
     geom_col(fill = "coral") +
     geom_hline(yintercept = cutoff, linetype = "dashed", colour = "grey30") +
-    scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
-    labs(title = "Mean cluster-wise Jaccard by k (fpc::clusterboot)",
-         subtitle = paste0(B, " bootstrap runs; dashed line = cutoff (", cutoff, ")"),
+    scale_y_continuous(labels = scales::percent, limits = c(0, 1),
+                       expand = expansion(mult = c(0, 0))) +
+    #labs(title = "Mean cluster-wise Jaccard by k (fpc::clusterboot)",
+    labs(title = NULL,
+         #subtitle = paste0(B, " bootstrap runs; dashed line = cutoff (", cutoff, ")"),
          x = "Number of clusters (k)",
          y = "Mean cluster Jaccard") +
     theme_classic() +
@@ -103,14 +105,14 @@ plot_clusterwise_stability = function(by_cluster, B, cutoff){
     scale_fill_manual(values = c(`TRUE` = "grey40", `FALSE` = "grey75"), guide = "none") +
     scale_y_continuous(labels = scales::percent, limits = c(0, 1.05)) +
     geom_text(aes(label = paste0("n=", size)), vjust = -0.35, size = 2.5) +
-    labs(title = "Cluster-wise stability (fpc::clusterboot)",
-         subtitle = paste0(B, " bootstrap runs; dashed line = stability cutoff (", cutoff, "); n = cluster size"),
+    labs(title = NULL,
+         subtitle = NULL,
          x = "Cluster",
          y = "Mean Jaccard similarity") +
     theme_classic() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
-          plot.title = element_text(face = "bold", size = 14),
-          plot.subtitle = element_text(size = 11),
+          plot.title = element_blank(),
+          plot.subtitle = element_blank(),
           strip.background = element_rect(fill = "grey95", colour = NA))}
 # ===========================Command Parameters Setting=============================
 option_list <- list(

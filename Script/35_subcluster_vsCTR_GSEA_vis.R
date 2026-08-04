@@ -24,6 +24,13 @@ suppressMessages(library("GOSemSim"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("stringr"))
 #===========================Function Definition=============================
+# Format MSigDB pathway names for display, e.g. HUMORAL_IMMUNE_RESPONSE -> Humoral Immune Response
+format_pathway_label = function(term){
+  x = gsub("^(GOBP|GOCC|GOMF|HP|REACTOME|KEGG|HALLMARK)_", "", term)
+  x = gsub("_", " ", x)
+  stringr::str_to_title(tolower(x))
+}
+
 # Build the term x cohort signed -log10(FDR) table for one comparison,
 # keeping terms significant in either cohort, using each cohort's FULL
 # (unfiltered) result table to look up the value regardless of whether
@@ -89,8 +96,13 @@ cluster_terms = function(go_ids, descriptions, k, ontology = "BP"){
 # Grouped horizontal bar plot: one row per term, one bar per cohort,
 # rows grouped into cluster blocks (separator line + block label), dotted
 # lines at the FDR<0.05 threshold.
-plot_gsea_barplot = function(df, case_label, cohort_colors, fdr_cutoff = 0.05){
+plot_gsea_barplot = function(df, case_label, cohort_colors, fdr_cutoff = 0.05,
+                             wrap_width = 35){
   thresh = -log10(fdr_cutoff)
+
+  # Title-case + wrap pathway / block labels for display
+  df$description = format_pathway_label(as.character(df$description))
+  df$cluster_label = format_pathway_label(as.character(df$cluster_label))
 
   # order rows: by cluster (clusters ordered by mean signed value, most
   # "up" first), then within cluster by signed value
@@ -117,7 +129,14 @@ plot_gsea_barplot = function(df, case_label, cohort_colors, fdr_cutoff = 0.05){
   block_info = df %>%
     distinct(description, cluster, cluster_label, y) %>%
     group_by(cluster, cluster_label) %>%
-    summarise(y_min = min(y), y_max = max(y), y_mid = mean(y), .groups = "drop")
+    summarise(y_min = min(y), y_max = max(y), y_mid = mean(y), .groups = "drop") %>%
+    arrange(y_min)
+
+  # Separators between blocks: draw above each block except the topmost.
+  # (Do NOT use block_info[-nrow(...)]: group_by order is by cluster id,
+  # not visual y-order, which previously dropped the wrong block and left
+  # two adjacent groups without a dividing line.)
+  block_separators = block_info %>% dplyr::filter(y_max < max(y_max))
 
   xrange = max(abs(df$signed_logp), na.rm = TRUE) * 1.15
   n_rows = max(df$y)
@@ -128,7 +147,7 @@ plot_gsea_barplot = function(df, case_label, cohort_colors, fdr_cutoff = 0.05){
     geom_vline(xintercept = 0, colour = "black", linewidth = 0.4) +
     geom_vline(data = data.frame(x = c(-thresh, thresh)),
               aes(xintercept = x, linetype = "FDR<0.05"), colour = "grey30") +
-    geom_hline(data = block_info[-nrow(block_info), ], aes(yintercept = y_max + 0.5),
+    geom_hline(data = block_separators, aes(yintercept = y_max + 0.5),
               colour = "black", linewidth = 0.4) +
     geom_text(data = block_info, aes(x = 0, y = y_mid, label = str_wrap(cluster_label, 18)),
              inherit.aes = FALSE, size = 3, fontface = "italic") +
@@ -139,12 +158,13 @@ plot_gsea_barplot = function(df, case_label, cohort_colors, fdr_cutoff = 0.05){
     scale_fill_manual(values = cohort_colors, name = NULL) +
     scale_linetype_manual(values = c("FDR<0.05" = "dotted"), name = NULL) +
     scale_x_continuous(limits = c(-xrange, xrange)) +
-    scale_y_discrete(expand = expansion(add = c(0.6, 2))) +
+    scale_y_discrete(labels = function(x) str_wrap(x, width = wrap_width),
+                     expand = expansion(add = c(0.6, 2))) +
     labs(title = paste0(case_label, " vs CTR"),
          x = "signed -log10(FDR)", y = NULL) +
     theme_classic(base_size = 12) +
     theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 15),
-         axis.text.y = element_text(size = 8),
+         axis.text.y = element_text(size = 8, lineheight = 0.9),
          legend.position = "right") +
     coord_cartesian(clip = "off")
 
@@ -216,7 +236,7 @@ for (comp in names(comparisons)){
   keep_ids = names(sort(built$min_fdr))[seq_len(min(opt$top_n, length(built$min_fdr)))]
   logp_mat = built$logp_mat[keep_ids, , drop = FALSE]
   description = built$description[match(keep_ids, rownames(built$logp_mat))]
-  description = gsub("^GOBP_|^GOMF_|^GOCC_", "", description)
+  description = format_pathway_label(description)
 
   go_ids = map_to_go_id(keep_ids, ontology_subcat = ontology_subcat)
   valid = !is.na(go_ids)
@@ -238,5 +258,8 @@ for (comp in names(comparisons)){
   write.csv(df, paste0(output_dir, "/GSEA_barplot_data_", comp, ".csv"), row.names = FALSE)
 
   p = plot_gsea_barplot(df, case_label, cohort_colors, fdr_cutoff = opt$fdr_cutoff)
-  ggsave(paste0(output_dir, "/GSEA_barplot_", comp, ".pdf"), p, width = 10, height = 8, dpi = 300)
+  # Taller figure when many terms so wrapped y-axis labels have room
+  plot_height = max(8, min(opt$top_n, nrow(logp_mat)) * 0.35 + 2)
+  ggsave(paste0(output_dir, "/GSEA_barplot_", comp, ".pdf"), p,
+         width = 10, height = plot_height, dpi = 300)
 }

@@ -1,17 +1,4 @@
 #=========================Script Description=================================
-# Revised version of 13_GSEA_IC_heatmap.R.
-#
-# We thank the reviewer for this observation. We agree that the previous
-# heatmap could be somewhat misleading. We have revised Fig. 1f and 2h
-# because, in the earlier version, non-significant pathways were treated as
-# missing and displayed as white. As a result, cohorts could appear strongly
-# discordant when a pathway was significant in one cohort but below the FDR
-# threshold in another. In the updated heatmap, we display the actual signed
-# -log10(FDR) for all included pathways across all cohorts. Light color
-# cells now reflect weak or non-significant effects, rather than missing
-# values. This revision reduces the apparent cross-cohort differences, while
-# still preserving genuine biological discordance where it exists.
-#
 # Significantly enriched terms (FDR < 0.05 in at least one cohort) are kept,
 # grouped by GO semantic similarity, and consolidated into --cluster_number
 # categories. Enrichment is shown as signed -log10(FDR): red = enriched in
@@ -215,7 +202,7 @@ ht <- Heatmap(
   cluster_columns = col_dend,
   cluster_rows = FALSE,
   col = col_fun,
-  na_col = "grey85",
+  na_col = "black",
   border = TRUE,
   show_row_names = TRUE,
   show_column_names = FALSE,
@@ -250,7 +237,7 @@ ht <- ComplexHeatmap::Heatmap(
   cluster_columns = col_dend,
   cluster_rows = FALSE,
   col = col_fun,
-  na_col = "grey85",
+  na_col = "black",
   border = TRUE,
   show_row_names = TRUE,
   show_column_names = FALSE,

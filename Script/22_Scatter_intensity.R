@@ -28,7 +28,7 @@ format_pval = function(p){
 # scatter plot of mean log2 intensity, Discovery (x) vs Validation (y)
 scatterplot_intensity = function(data,
                                  q = 0.97,
-                                 main_title = "Protein Intensity: Discovery vs Validation",
+                                 #main_title = "Protein Intensity: Discovery vs Validation",
                                  max.overlaps = 10,
                                  lab_x = "log2(mean LFQ intensity) for Discovery",
                                  lab_y = "log2(mean LFQ intensity) for Validation",
@@ -54,14 +54,14 @@ scatterplot_intensity = function(data,
                     segment.size = 0.2,
                     min.segment.length = 0,
                     size = 2.5)  +
-    labs(title = main_title,
+    labs(title = NULL,
          x = lab_x,
          y = lab_y) +
     theme_classic() + # Select theme with a white background
     theme(axis.title.y = element_text(size = 14),
           axis.title.x = element_text(size = 14),
           axis.text = element_text(size = 12),
-          plot.title = element_text(size = 15, hjust = 0.5),
+          plot.title = element_blank(),
           text = element_text(size = 14)) +
     if(annotate_YN){
       annotate("text",
@@ -126,9 +126,11 @@ data = data.table(name = inter,
                   x = mean_Discovery[inter],
                   y = mean_Validation[inter])
 
-res = scatterplot_intensity(data, q = 0.97, main_title = "Protein Intensity: Discovery vs Validation", max.overlaps = Inf)
+res = scatterplot_intensity(data, q = 0.97, #main_title = "Protein Intensity: Discovery vs Validation",
+                            max.overlaps = Inf)
 
-ggsave(paste0(output_dir, "/Scatter_intensity_Discovery_vs_Validation.pdf"), res$plot, width = 6, height = 5, dpi = 300)
+ggsave(paste0(output_dir, "/Scatter_intensity_Discovery_vs_Validation.pdf"), res$plot,
+       width = 6, height = 5, device = cairo_pdf)
 
 sink(paste0(output_dir, "/intensity_cor.txt"))
 print(res$pearson)
