@@ -120,6 +120,7 @@ run_contrast_scatter = function(contrast, contrast_label, res_Discovery_inter, r
 
   p = scatterplot_FDR_male_female(data, q = 0.95, main_title = paste0(contrast_label, " (FDR)"), max.overlaps = Inf)
   ggsave(paste0(output_dir, "/", contrast, "_FDR.pdf"), p, width = 6, height = 4, dpi = 300)
+  ggsave(paste0(output_dir, "/", contrast, "_FDR.svg"), p, width = 6, height = 4, dpi = 300)
 
   sink(paste0(output_dir, "/", contrast, "_FDR_cor.txt"))
   print(cor.test(data$x, data$y, method = "pearson"))
@@ -138,6 +139,7 @@ run_contrast_scatter = function(contrast, contrast_label, res_Discovery_inter, r
                                   lab_x = "signed -log10(pvalue) for Discovery",
                                   lab_y = "signed -log10(pvalue) for Validation")
   ggsave(paste0(output_dir, "/", contrast, "_pvalue.pdf"), p, width = 6, height = 4, dpi = 300)
+  ggsave(paste0(output_dir, "/", contrast, "_pvalue.svg"), p, width = 6, height = 4, dpi = 300)
 
   sink(paste0(output_dir, "/", contrast, "_pvalue_cor.txt"))
   print(cor.test(data$x, data$y, method = "pearson"))

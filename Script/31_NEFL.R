@@ -173,8 +173,13 @@ write.csv(combined, paste0(output_dir, "/", variable, "_all_samples.csv"), row.n
 #PLOTS
 box_plot = plot_clinical_boxplot(combined, group_colors, variable)
 ggsave(paste0(output_dir, "/", variable, "_boxplot.pdf"), box_plot, width = 5.5, height = 5, dpi = 300)
+ggsave(paste0(output_dir, "/", variable, "_boxplot.svg"), box_plot, width = 5.5, height = 5, dpi = 300)
 
 ht = plot_clinical_heatmap(combined, group_colors, cohort_colors, variable)
 pdf(paste0(output_dir, "/", variable, "_heatmap.pdf"), width = 12, height = 3)
+draw(ht)
+dev.off()
+
+svg(paste0(output_dir, "/", variable, "_heatmap.svg"), width = 12, height = 3)
 draw(ht)
 dev.off()

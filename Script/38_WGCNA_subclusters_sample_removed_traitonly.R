@@ -104,16 +104,26 @@ calculate_pvalues <- function(MEs, toplot, factorMeta, cluster_col) {
 
 # Function to plot Eigenprotein value boxplots
 plot_boxplots <- function(toplot, factorMeta, cluster_col, file_name) {
-  pdf(file_name, onefile = FALSE)
-  num_plots <- length(setdiff(seq_len(nrow(toplot)), which(colnames(MEs) == "grey")))
-  layout_dim <- ceiling(sqrt(num_plots))
-  par(mfrow = c(ceiling(num_plots / layout_dim), layout_dim))
+  draw_boxplots <- function() {
+    num_plots <- length(setdiff(seq_len(nrow(toplot)), which(colnames(MEs) == "grey")))
+    layout_dim <- ceiling(sqrt(num_plots))
+    par(mfrow = c(ceiling(num_plots / layout_dim), layout_dim))
 
-  for (i in setdiff(seq_len(nrow(toplot)), which(colnames(MEs) == "grey"))) {
-    boxplot(toplot[i, ] ~ factorMeta[[cluster_col]], col = colnames(MEs)[i],
-            ylab = "Eigenprotein Value", main = rownames(toplot)[i], xlab = NULL)
+    for (i in setdiff(seq_len(nrow(toplot)), which(colnames(MEs) == "grey"))) {
+      boxplot(toplot[i, ] ~ factorMeta[[cluster_col]], col = colnames(MEs)[i],
+              ylab = "Eigenprotein Value", main = rownames(toplot)[i], xlab = NULL)
+    }
   }
+
+  pdf(file_name, onefile = FALSE)
+  draw_boxplots()
   dev.off()
+
+  svg_name <- sub("\\.pdf$", ".svg", file_name)
+  svg(svg_name)
+  draw_boxplots()
+  dev.off()
+
   par(mfrow = c(1, 1))  # Reset plotting parameters
 }
 # ===========================Command Parameters Setting=============================
@@ -335,6 +345,10 @@ if (!is.null(numericMeta)) {
     )
   )
 
+  draw(ht)
+  dev.off()
+
+  svg(file.path(output_dir, "WGCNA_ModuleTrait_heatmap_gradient.svg"), width = 6, height = 5.5)
   draw(ht)
   dev.off()
 } else {

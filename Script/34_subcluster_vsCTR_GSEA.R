@@ -104,6 +104,7 @@ run_gsea_for_comparison = function(result, comp, case_label, output_dir, seed){
          legend.position = "right")
 
   ggsave(paste0(output_dir, "/GSEA_BP_top20_", comp, ".pdf"), p, width = 12, height = 10)
+  ggsave(paste0(output_dir, "/GSEA_BP_top20_", comp, ".svg"), p, width = 12, height = 10)
   write.csv(BP_top, paste0(output_dir, "/GSEA_BP_top20_", comp, ".csv"), row.names = FALSE)
 
   return(GSEA_result)}

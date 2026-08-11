@@ -195,9 +195,11 @@ if (isTRUE(opt$vis)){
 
   fig6 = plot_mean_jaccard_by_k(by_k, B = opt$B, cutoff = opt$cutoff)
   ggsave(paste0(output_dir, "/mean_jaccard_by_k.pdf"), fig6, width = 7, height = 5, dpi = 300)
+  ggsave(paste0(output_dir, "/mean_jaccard_by_k.svg"), fig6, width = 7, height = 5, dpi = 300)
 
   fig7 = plot_clusterwise_stability(by_cluster, B = opt$B, cutoff = opt$cutoff)
   ggsave(paste0(output_dir, "/clusterwise_stability.pdf"), fig7, width = 11, height = 8, dpi = 300)
+  ggsave(paste0(output_dir, "/clusterwise_stability.svg"), fig7, width = 11, height = 8, dpi = 300)
 
   message("Wrote plots to ", output_dir)
 

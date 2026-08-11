@@ -171,6 +171,8 @@ for (i in seq_along(comparisons)) {
 #===========================Save Plots======================================
 ggarrange(plotlist = plots_FDR0.05, ncol = 2, nrow = 1)
 ggsave(filename = file.path(output_dir, "FDR005.pdf"), width = 12, height = 5, units = "in")
+ggsave(filename = file.path(output_dir, "FDR005.svg"), width = 12, height = 5, units = "in")
 
 ggarrange(plotlist = plots_FDR0.1, ncol = 2, nrow = 1)
 ggsave(filename = file.path(output_dir, "FDR01.pdf"), width = 12, height = 5, units = "in")
+ggsave(filename = file.path(output_dir, "FDR01.svg"), width = 12, height = 5, units = "in")

@@ -149,6 +149,7 @@ data$fdr_y = as.numeric(data$fdr_y)
 p = scatterplot_logFC_discovery_validation(data, q = 0.95, main_title = "ALS vs Control (log2FC)", max.overlaps = Inf)
 
 ggsave(paste0(output_dir, "/ALS_vs_Control_logFC.pdf"), p, width = 7, height = 5)
+ggsave(paste0(output_dir, "/ALS_vs_Control_logFC.svg"), p, width = 7, height = 5)
 
 sink(paste0(output_dir, "/logFC_cor.txt"))
 cor.test(data$x, data$y, method = "pearson")

@@ -149,6 +149,7 @@ data$y[res_Validation_inter$als_vs_ctrl_diff <0] = -data$y[res_Validation_inter$
 p = scatterplot_FDR_male_female(data, q = 0.95, main_title = "ALS vs Control(FDR)",max.overlaps = Inf)
 
 ggsave(paste0(output_dir, "/ALS_vs_Control.pdf"), p, width = 6, height = 4, dpi = 300)
+ggsave(paste0(output_dir, "/ALS_vs_Control.svg"), p, width = 6, height = 4, dpi = 300)
 
 sink(paste0(output_dir, "/FDR_cor.txt"))
 cor.test(data$x, data$y, method = "pearson")
@@ -178,6 +179,7 @@ p = scatterplot_FDR_male_female(data, q = 0.95, main_title = "ALS vs Control(pva
                                 lab_y = "signed -log10(pvalue) for Validation")
 
 ggsave(paste0(output_dir, "/ALS_vs_Control_pvalue.pdf"), p, width = 6, height = 4, dpi = 300)
+ggsave(paste0(output_dir, "/ALS_vs_Control_pvalue.svg"), p, width = 6, height = 4, dpi = 300)
 
 sink(paste0(output_dir, "/pvalue_cor.txt"))
 cor.test(data$x, data$y, method = "pearson")

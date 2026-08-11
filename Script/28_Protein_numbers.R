@@ -172,6 +172,7 @@ stage_colors = c("Before filtering" = "#F8766D", "After filtering" = "#00BFC4")
 p = plot_protein_numbers(data, stage_colors)
 
 ggsave(paste0(output_dir, "/Protein_numbers_before_after_filter.pdf"), p, width = 5, height = 4, dpi = 300)
+ggsave(paste0(output_dir, "/Protein_numbers_before_after_filter.svg"), p, width = 5, height = 4, dpi = 300)
 
 ################################################################################################
 #PER-SAMPLE BAR PLOTS, ONE PER COHORT x STAGE, COLOURED BY DISEASE GROUP
@@ -187,6 +188,8 @@ for(spec in per_sample_specs){
   d = data[data$cohort == spec$cohort & data$stage == stage_label_map[[spec$stage]], ]
   p_sample = plot_protein_numbers_per_sample(d, paste0("Proteins per sample (", spec$label, ")"))
   ggsave(paste0(output_dir, "/proteins_per_sample_", spec$cohort, "_", spec$stage, ".pdf"),
+        p_sample, width = 9, height = 4.5, dpi = 300)
+  ggsave(paste0(output_dir, "/proteins_per_sample_", spec$cohort, "_", spec$stage, ".svg"),
         p_sample, width = 9, height = 4.5, dpi = 300)}
 
 ################################################################################################
@@ -196,4 +199,6 @@ for(coh in c("Discovery", "Validation")){
   p_stage = plot_protein_numbers_per_sample_stage(d, stage_colors,
                                                   paste0("Proteins per sample (", coh, " cohort)"))
   ggsave(paste0(output_dir, "/proteins_per_sample_before_after_", coh, ".pdf"),
+        p_stage, width = 9, height = 4.5, dpi = 300)
+  ggsave(paste0(output_dir, "/proteins_per_sample_before_after_", coh, ".svg"),
         p_stage, width = 9, height = 4.5, dpi = 300)}

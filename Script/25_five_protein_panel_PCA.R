@@ -179,6 +179,7 @@ res = plot_panel_pca(mat, subgroup,
                      cluster_colors = cluster_colors)
 
 ggsave(paste0(output_dir, "/Five_protein_panel_PCA_", cohort, ".pdf"), res$plot, width = 6, height = 5, dpi = 300)
+ggsave(paste0(output_dir, "/Five_protein_panel_PCA_", cohort, ".svg"), res$plot, width = 6, height = 5, dpi = 300)
 
 write.csv(res$scores, paste0(output_dir, "/PCA_scores_", cohort, ".csv"), row.names = FALSE)
 saveRDS(res$pca_res, paste0(output_dir, "/PCA_object_", cohort, ".rds"))

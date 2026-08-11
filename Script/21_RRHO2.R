@@ -239,6 +239,10 @@ RRHO_obj = rrho2_plot(discovery_list, validation_list,
                       labels = c("Discovery", "Validation"),
                       main_title = "RRHO2: ALS vs Control",
                       stepsize = opt$stepsize)
+# copy the already-rendered plot to an svg device (avoids recomputing the
+# rank-rank hypergeometric overlap a second time)
+dev.copy(svg, filename = paste0(output_dir, "/RRHO2_heatmap.svg"), width = 7, height = 6)
+dev.off()
 dev.off()
 
 saveRDS(RRHO_obj, paste0(output_dir, "/RRHO2_obj.rds"))
@@ -246,6 +250,7 @@ saveRDS(RRHO_obj, paste0(output_dir, "/RRHO2_obj.rds"))
 # Quadrant-direction legend matching the heatmap's displayed orientation
 legend_plot = rrho2_quadrant_legend()
 ggsave(paste0(output_dir, "/RRHO2_quadrant_legend.pdf"), legend_plot, width = 3, height = 3)
+ggsave(paste0(output_dir, "/RRHO2_quadrant_legend.svg"), legend_plot, width = 3, height = 3)
 
 # Summary table at the most significant UU pixel (rank thresholds from that pixel)
 max_neg_log_p = max(RRHO_obj$hypermat, na.rm = TRUE)

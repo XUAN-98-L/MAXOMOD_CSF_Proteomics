@@ -340,6 +340,8 @@ combined_plot = plot_vs_control(set_long, group_colors,
                                 facet_by_cohort = TRUE, set_levels = set_levels)
 ggsave(paste0(output_dir, "/Combined_subtype_vs_control_boxplot.pdf"), combined_plot,
       width = 11, height = 7, dpi = 300)
+ggsave(paste0(output_dir, "/Combined_subtype_vs_control_boxplot.svg"), combined_plot,
+      width = 11, height = 7, dpi = 300)
 
 # one boxplot figure per cohort (single row, 4 panels), matching each cohort separately
 for (cohort in cohorts){
@@ -348,6 +350,7 @@ for (cohort in cohorts){
                       main_title = paste0(cohort, " - subtype-defining proteins vs control"),
                       facet_by_cohort = FALSE, set_levels = set_levels)
   ggsave(paste0(output_dir, "/", cohort, "_subtype_vs_control_boxplot.pdf"), p, width = 11, height = 3.2, dpi = 300)
+  ggsave(paste0(output_dir, "/", cohort, "_subtype_vs_control_boxplot.svg"), p, width = 11, height = 3.2, dpi = 300)
 }
 
 # per-protein boxplots for the ML-selected panel: one row, one panel per protein
@@ -375,5 +378,7 @@ for (cohort in cohorts){
           strip.background = element_rect(fill = "grey90", colour = NA))
 
   ggsave(paste0(output_dir, "/", cohort, "_protein_boxplot.pdf"), p,
+         width = max(10, 2.4 * n_proteins), height = 4, dpi = 300, limitsize = FALSE)
+  ggsave(paste0(output_dir, "/", cohort, "_protein_boxplot.svg"), p,
          width = max(10, 2.4 * n_proteins), height = 4, dpi = 300, limitsize = FALSE)
 }

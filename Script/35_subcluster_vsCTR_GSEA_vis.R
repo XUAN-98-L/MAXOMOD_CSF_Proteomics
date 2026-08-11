@@ -262,4 +262,6 @@ for (comp in names(comparisons)){
   plot_height = max(8, min(opt$top_n, nrow(logp_mat)) * 0.35 + 2)
   ggsave(paste0(output_dir, "/GSEA_barplot_", comp, ".pdf"), p,
          width = 10, height = plot_height, dpi = 300)
+  ggsave(paste0(output_dir, "/GSEA_barplot_", comp, ".svg"), p,
+         width = 10, height = plot_height, dpi = 300)
 }

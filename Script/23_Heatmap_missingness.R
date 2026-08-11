@@ -202,7 +202,23 @@ ComplexHeatmap::draw(before$heatmap,
                      annotation_legend_side = "right")
 dev.off()
 
+svg(paste0(output_dir, "/Missingness_heatmap_before.svg"), width = 11, height = 8)
+ComplexHeatmap::draw(before$heatmap,
+                     column_title = before$panel_title,
+                     column_title_gp = grid::gpar(fontsize = 16, fontface = "bold"),
+                     heatmap_legend_side = "right",
+                     annotation_legend_side = "right")
+dev.off()
+
 pdf(paste0(output_dir, "/Missingness_heatmap_after.pdf"), width = 11, height = 8)
+ComplexHeatmap::draw(after$heatmap,
+                     column_title = after$panel_title,
+                     column_title_gp = grid::gpar(fontsize = 16, fontface = "bold"),
+                     heatmap_legend_side = "right",
+                     annotation_legend_side = "right")
+dev.off()
+
+svg(paste0(output_dir, "/Missingness_heatmap_after.svg"), width = 11, height = 8)
 ComplexHeatmap::draw(after$heatmap,
                      column_title = after$panel_title,
                      column_title_gp = grid::gpar(fontsize = 16, fontface = "bold"),

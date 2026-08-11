@@ -237,5 +237,6 @@ p <- ggplot(gsea_df, aes(x = signed_logp, y = Description_trunc, fill = NES > 0)
   )
 
 ggsave(paste0(output_dir,"/GSEA_BP_top",top,".pdf"), p, width = 12, height = 10)
+ggsave(paste0(output_dir,"/GSEA_BP_top",top,".svg"), p, width = 12, height = 10)
 write.csv(BP_top, paste0(output_dir,"/GSEA_BP_top",top,".csv"),row.names = FALSE)
 }

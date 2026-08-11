@@ -494,6 +494,10 @@ run_gsva_geneset_analysis = function(gs_subcat, output_suffix, label_for_message
        )
   dev.off()
 
+  svg(file.path(output_dir, paste0("GSVA_mean_k3", output_suffix, ".svg")), width = plot_width, height = pdf_height)
+  draw(pathway_heatmap_mean)
+  dev.off()
+
   invisible(NULL)
 }
 #===========================Command Parameters Setting=========================

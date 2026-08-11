@@ -241,10 +241,13 @@ for (cohort in cohorts){
                                main_title = paste0(cohort, ": ALS vs CTR"))
   ggsave(paste0(output_dir, "/", cohort, "_MA_plot.pdf"), ma_plots[[cohort]],
         width = 6, height = 4)
+  ggsave(paste0(output_dir, "/", cohort, "_MA_plot.svg"), ma_plots[[cohort]],
+        width = 6, height = 4)
 }
 
 ggarrange(plotlist = ma_plots, ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
 ggsave(paste0(output_dir, "/Combined_MA_plot.pdf"), width = 12, height = 4)
+ggsave(paste0(output_dir, "/Combined_MA_plot.svg"), width = 12, height = 4)
 
 ################################################################################################
 #MA PLOTS - CONTINUOUS GRADIENT, NO CUTOFF (per cohort + combined)
@@ -260,7 +263,10 @@ for (cohort in cohorts){
                                                  scale_max = shared_scale_max)
   ggsave(paste0(output_dir, "/", cohort, "_MA_plot_gradient.pdf"), ma_plots_gradient[[cohort]],
         width = 6, height = 4)
+  ggsave(paste0(output_dir, "/", cohort, "_MA_plot_gradient.svg"), ma_plots_gradient[[cohort]],
+        width = 6, height = 4)
 }
 
 ggarrange(plotlist = ma_plots_gradient, ncol = 2, nrow = 1, common.legend = TRUE, legend = "right")
 ggsave(paste0(output_dir, "/Combined_MA_plot_gradient.pdf"), width = 12, height = 4)
+ggsave(paste0(output_dir, "/Combined_MA_plot_gradient.svg"), width = 12, height = 4)

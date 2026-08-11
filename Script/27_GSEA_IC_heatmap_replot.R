@@ -283,6 +283,16 @@ cairo_pdf(
 draw(ht)
 dev.off()
 
+svg_path <- file.path(output_dir, "heatmap_plot.svg")
+svg(
+  filename = svg_path,
+  width = plot_width,
+  height = plot_height,
+  family = "Arial"
+)
+draw(ht)
+dev.off()
+
 # save the heatmap result to file
 df_long <- as.data.frame(logp_mat) %>%
   tibble::rownames_to_column("GO_term") %>%
