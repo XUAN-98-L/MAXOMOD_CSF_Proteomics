@@ -126,3 +126,9 @@ Rscript Script/38_WGCNA_subclusters_sample_removed_traitonly.R -i Discovery/02_M
 Rscript Script/38_WGCNA_subclusters_sample_removed_traitonly.R -i Validation/02_Missing_Inspection_subclusters/norm_imp_MinProb.rds -n Discovery/10_WGCNA_subclusters/WGCNA_net.rds -c Validation/08_Clustering_als/cluster_assignments_2.csv -o Validation/38_WGCNA_subclusters_sample_removed_traitonly --cohort Validation -e 9
 
 Rscript Script/38_WGCNA_subclusters_sample_removed_traitonly.R -i External/norm_imp_MinProb_als.rds -o External/39_WGCNA_comparison_subclusters_sample_removed --net Discovery/10_WGCNA_subclusters/WGCNA_net.rds -e 9 -c External/cluster_assignments_2.csv --cohort External
+
+Rscript Script/42_Convert_Protein.R
+
+Rscript Script/43_Predict_ELA_LS_Subtype.R
+
+Rscript Script/44_Pre_Processing_ELA_LS.R -i 42_Convert_Protein/ELA-LS_Report_with_gene_names.csv -o 44_Pre_Processing_ELA_LS -e 9 -t 0.5 -q 0.01
